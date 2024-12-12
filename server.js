@@ -4,38 +4,39 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 
-
 const PORT = process.env.PORT || 3000;
-app.use(express.static('public'));
 
+// Middleware to serve static files from the 'front' folder
+app.use(express.static(path.join(__dirname, 'front')));
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
+// Connect to the database
 const connectDB = require('./config/db');
 connectDB();
 
-//cors
+// CORS configuration
 const corsOptions = {
-    origin: process.env.ALLOWED_CLIENTS.split(',')
-    // ['http://localhost:3000', 'http://localhost:5000', 'http://localhost:3300','http://localhost:10000']
-  }
+  origin: process.env.ALLOWED_CLIENTS.split(','),
+};
+app.use(cors(corsOptions));
 
-  app.use(cors(corsOptions));
-
-//template engine 
+// Set up EJS template engine (if needed)
 app.set('views', path.join(__dirname, '/views'));
 app.set('view engine', 'ejs');
 
-
+// Serve the front's index.html as the root route
 app.get('/', (req, res) => {
-    res.send('Hello, World!');
+  res.sendFile(path.join(__dirname, 'front', 'index.html'));
 });
 
-//route er jonno 
+// API routes
 app.use('/api/files', require('./routes/files'));
 app.use('/files', require('./routes/show'));
 app.use('/files/download', require('./routes/download'));
 
-
-app.listen(PORT,()=>{
-    console.log(`Listening on port ${PORT}.`);
-} )
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}.`);
+});
