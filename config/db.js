@@ -56,27 +56,35 @@
 // }
 
 // module.exports = connectDB;
+
+
+
 require('dotenv').config(); // Load environment variables
 const mongoose = require('mongoose');
 
 async function connectDB() {
+    // Check if the connection string is provided in the environment variables
     if (!process.env.MONGO_CONNECTION_URL) {
         console.error('MONGO_CONNECTION_URL is not defined in the environment variables.');
         process.exit(1); // Exit the process if the connection string is missing
     }
 
     try {
+        // Establish a connection to the MongoDB database
         await mongoose.connect(process.env.MONGO_CONNECTION_URL, {
-            tls: true, // Ensure TLS is enabled
-            tlsInsecure: false, // Reject invalid certificates
+            useNewUrlParser: true, // Avoid deprecation warnings
+            useUnifiedTopology: true, // Use the new server discovery and monitoring engine
+            serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds if unable to connect
         });
-        console.log('Database connected');
+        console.log('Database connected successfully.');
     } catch (err) {
-        console.error('Connection failed:', err);
+        // Provide a detailed error message to aid debugging
+        console.error('Connection failed:', err.message);
+        if (err.reason && err.reason.message) {
+            console.error('Reason:', err.reason.message);
+        }
         process.exit(1); // Exit the process on a connection error
     }
 }
 
 module.exports = connectDB;
-
-
