@@ -63,26 +63,19 @@ require('dotenv').config(); // Load environment variables
 const mongoose = require('mongoose');
 
 async function connectDB() {
-    // Check if the connection string is provided in the environment variables
     if (!process.env.MONGO_CONNECTION_URL) {
         console.error('MONGO_CONNECTION_URL is not defined in the environment variables.');
         process.exit(1); // Exit the process if the connection string is missing
     }
 
     try {
-        // Establish a connection to the MongoDB database
         await mongoose.connect(process.env.MONGO_CONNECTION_URL, {
-            useNewUrlParser: true, // Avoid deprecation warnings
-            useUnifiedTopology: true, // Use the new server discovery and monitoring engine
-            serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds if unable to connect
+            tls: true, // Ensure TLS is enabled
+            tlsInsecure: false, // Reject invalid certificates
         });
-        console.log('Database connected successfully.');
+        console.log('Database connected');
     } catch (err) {
-        // Provide a detailed error message to aid debugging
-        console.error('Connection failed:', err.message);
-        if (err.reason && err.reason.message) {
-            console.error('Reason:', err.reason.message);
-        }
+        console.error('Connection failed:', err);
         process.exit(1); // Exit the process on a connection error
     }
 }
