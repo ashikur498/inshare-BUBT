@@ -1,42 +1,25 @@
-require('dotenv').config();
 const express = require('express');
-const app = express();
+const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
+require('dotenv').config();
+
+const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(express.static('public'));
+app.use(cors());
+
+// Connect to DB
+require('./config/db')();
+
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/files', require('./routes/files'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 const PORT = process.env.PORT || 3000;
-
-// Middleware to serve static files from the 'front' folder
-app.use(express.static(path.join(__dirname, 'front')));
-
-// Middleware to parse JSON bodies
-app.use(express.json());
-
-// Connect to the database
-const connectDB = require('./config/db');
-connectDB();
-
-// CORS configuration
-const corsOptions = {
-  origin: process.env.ALLOWED_CLIENTS.split(','),
-};
-app.use(cors(corsOptions));
-
-// Set up EJS template engine (if needed)
-app.set('views', path.join(__dirname, '/views'));
-app.set('view engine', 'ejs');
-
-// Serve the front's index.html as the root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'front', 'index.html'));
-});
-
-// API routes
-app.use('/api/files', require('./routes/files'));
-app.use('/files', require('./routes/show'));
-app.use('/files/download', require('./routes/download'));
-
-// Start the server
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}.`);
+    console.log(`Server is running on port ${PORT}`);
 });

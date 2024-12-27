@@ -59,25 +59,45 @@
 
 
 
-require('dotenv').config(); // Load environment variables
+// require('dotenv').config(); // Load environment variables
+// const mongoose = require('mongoose');
+
+// async function connectDB() {
+//     if (!process.env.MONGO_CONNECTION_URL) {
+//         console.error('MONGO_CONNECTION_URL is not defined in the environment variables.');
+//         process.exit(1); // Exit the process if the connection string is missing
+//     }
+
+//     try {
+//         await mongoose.connect(process.env.MONGO_CONNECTION_URL, {
+//             tls: true, // Ensure TLS is enabled
+//             tlsInsecure: false, // Reject invalid certificates
+//         });
+//         console.log('Database connected');
+//     } catch (err) {
+//         console.error('Connection failed:', err);
+//         process.exit(1); // Exit the process on a connection error
+//     }
+// }
+
+// module.exports = connectDB;
+
 const mongoose = require('mongoose');
 
-async function connectDB() {
-    if (!process.env.MONGO_CONNECTION_URL) {
-        console.error('MONGO_CONNECTION_URL is not defined in the environment variables.');
-        process.exit(1); // Exit the process if the connection string is missing
-    }
-
+const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_CONNECTION_URL, {
-            tls: true, // Ensure TLS is enabled
-            tlsInsecure: false, // Reject invalid certificates
+        const conn = await mongoose.connect(process.env.MONGO_CONNECTION_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true,
+            useFindAndModify: false
         });
-        console.log('Database connected');
-    } catch (err) {
-        console.error('Connection failed:', err);
-        process.exit(1); // Exit the process on a connection error
+
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1);
     }
-}
+};
 
 module.exports = connectDB;
