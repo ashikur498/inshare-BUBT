@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download | InShare</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <section class="download">
+        <img class="download__icon" src="/img/download-sd.svg" alt="inshare-download">
+        <h2>Your file is ready to download</h2>
+        <p class="download__meta">
+            <span class="download__filename"></span>
+            <span class="download__filesize"></span>
+        </p>
+        <div class="download__btn-container">
+            <a href="" class="download__btn" download>Download file</a>
+        </div>
+    </section>
+
+    <script>
+        const downloadBtn = document.querySelector('.download__btn');
+        const filename = document.querySelector('.download__filename');
+        const filesize = document.querySelector('.download__filesize');
+
+        // Get the UUID from URL
+        const uuid = window.location.pathname.split('/').pop();
+
+        // Fetch file details
+        fetch(`/files/${uuid}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                console.log(data);
+                downloadBtn.href = data.downloadLink;
+                filename.textContent = data.fileName;
+                filesize.textContent = formatBytes(data.fileSize);
+            })
+            .catch(err => {
+                showError('Something went wrong.');
+            });
+
+        function showError(msg) {
+            document.querySelector('.download').innerHTML = `
+                <h3 class="error">${msg}</h3>
+            `;
+        }
+
+        function formatBytes(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            if (bytes === 0) return '0 Byte';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>

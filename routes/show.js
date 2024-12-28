@@ -4,12 +4,12 @@ const File = require('../models/File');
 router.get('/:uuid', async (req, res) => {
     try {
         const file = await File.findOne({ uuid: req.params.uuid });
-        if (!file) {
-            // Change from render to json response
-            return res.status(404).json({ error: 'Link has expired' });
-        }
         
-        // Return JSON instead of rendering a view
+        if (!file) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        // Send file details as JSON
         return res.json({
             uuid: file.uuid,
             fileName: file.filename,

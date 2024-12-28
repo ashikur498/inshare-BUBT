@@ -402,6 +402,41 @@ nav {
       color: #fff;
   }
 }
+.download {
+  background: #ffffff;
+  border-radius: 25px;
+  box-shadow: 0 20px 20px 0 #00000017;
+  padding: 2rem;
+  text-align: center;
+  width: 400px;
+  margin: 50px auto;
+}
+
+.download__icon {
+  height: 8rem;
+}
+
+.download__meta {
+  color: #0000008c;
+  margin-bottom: 1rem;
+}
+
+.download__btn {
+  background: var(--primary-color);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.download__btn:hover {
+  background: var(--primary-dark);
+}
+
+.error {
+  color: red;
+}
 
 /* Animations */
 @keyframes pulse {
