@@ -1,4 +1,3 @@
-// routes/auth.js
 const router = require('express').Router();
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
@@ -15,32 +14,22 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Email already registered' });
         }
 
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         // Create new user
         const user = new User({
             name,
             email,
-            password
+            password: hashedPassword
         });
 
         await user.save();
 
-        // Generate JWT token
-        const token = jwt.sign(
-            { userId: user._id }, 
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        res.status(201).json({
-            message: 'Registration successful',
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email
-            },
-            token
-        });
+        res.status(201).json({ message: 'Registration successful' });
     } catch (error) {
+        console.error('Registration error:', error);
         res.status(500).json({ error: 'Registration failed' });
     }
 });
@@ -57,8 +46,8 @@ router.post('/login', async (req, res) => {
         }
 
         // Check password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
@@ -70,15 +59,15 @@ router.post('/login', async (req, res) => {
         );
 
         res.json({
-            message: 'Login successful',
+            token,
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email
-            },
-            token
+            }
         });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
     }
 });

@@ -1,25 +1,29 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const app = express();
 const path = require('path');
 const cors = require('cors');
-const authRouter = require('./routes/auth');
 require('dotenv').config();
+const connectDB = require('./config/db');
 
-const app = express();
-
-// Middleware
-app.use(express.json());
+// Middlewares
 app.use(express.static('public'));
+app.use(express.json());
 app.use(cors());
-app.use('/api/auth', authRouter);
 
-// Connect to DB
-require('./config/db')();
+// Connect to Database
+connectDB();
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/files', require('./routes/files'));
-app.use('/api/analytics', require('./routes/analytics'));
+app.use('/files', require('./routes/show'));
+app.use('/files/download', require('./routes/download'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Something went wrong!' });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

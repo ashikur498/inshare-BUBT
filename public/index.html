@@ -3,125 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InShare BUBT - File Sharing Made Easy</title>
+    <title>InShare - File Sharing Made Easy</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar">
+    <nav>
         <div class="logo">
             <img src="img/logo.png" alt="InShare">
         </div>
         <div class="nav-right">
-            <button id="theme-toggle">
-                <i class="fas fa-moon"></i>
-            </button>
-            <div class="auth-buttons">
-                <button id="loginBtn">Login</button>
-                <button id="registerBtn">Register</button>
-            </div>
-            <div class="user-profile" style="display: none;">
-                <span id="userName"></span>
-                <button id="logoutBtn">Logout</button>
-            </div>
+            <button id="loginBtn">Login</button>
+            <button id="registerBtn">Register</button>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="upload-container">
-            <div class="drop-zone">
-                <div class="icon-container">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </div>
-                <div class="title">
-                    Drop your files here or <span class="browse">browse</span>
-                </div>
-                <input type="file" id="fileInput" multiple hidden>
+    <section class="upload-container">
+        <!-- Drop Zone -->
+        <div class="drop-zone">
+            <div class="icon-container">
+                <img src="img/file.svg" alt="file icon" class="center" draggable="false">
+                <img src="img/file.svg" alt="file icon" class="left" draggable="false">
+                <img src="img/file.svg" alt="file icon" class="right" draggable="false">
             </div>
+            <input type="file" id="fileInput">
+            <div class="title">Drop your Files here or, <span class="browseBtn">browse</span></div>
+        </div>
 
-            <div class="progress-container" style="display: none;">
-                <div class="progress-bar">
-                    <div class="progress"></div>
+        <!-- Progress Container -->
+        <div class="progress-container">
+            <div class="bg-progress"></div>
+            <div class="inner-container">
+                <div class="status">Uploading...</div>
+                <div class="percent-container">
+                    <span class="percentage" id="percent">0</span>%
                 </div>
-                <div class="progress-details">
-                    <span class="filename"></span>
-                    <span class="percent">0%</span>
-                </div>
-            </div>
-
-            <div class="sharing-container" style="display: none;">
-                <div class="sharing-options">
-                    <label>
-                        <input type="checkbox" id="password-protect">
-                        Password Protect
-                    </label>
-                    <label>
-                        <input type="checkbox" id="encrypt-file">
-                        Encrypt File
-                    </label>
-                    <div class="expiry-select">
-                        <label>Expire after:</label>
-                        <select id="expiry-days">
-                            <option value="1">1 day</option>
-                            <option value="7">7 days</option>
-                            <option value="30">30 days</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="password-input" style="display: none;">
-                    <input type="password" placeholder="Enter password">
-                </div>
+                <div class="progress-bar"></div>
             </div>
         </div>
 
-        <div class="download-link-container" style="display: none;">
-            <h3>Your file is ready to share!</h3>
-            <div class="link-container">
+        <!-- Sharing Container -->
+        <div class="sharing-container">
+            <p class="expire">Link expires in 24 hrs</p>
+            <div class="input-container">
                 <input type="text" id="fileURL" readonly>
-                <button id="copyBtn">Copy</button>
+                <img src="img/copy-icon.svg" id="copyBtn" alt="copy to clipboard">
             </div>
-            <div class="qr-code">
-                <img id="qrCode" src="" alt="QR Code">
-            </div>
-            <div class="share-buttons">
-                <button class="share-btn" data-platform="email">
-                    <i class="fas fa-envelope"></i>
-                </button>
-                <button class="share-btn" data-platform="whatsapp">
-                    <i class="fab fa-whatsapp"></i>
-                </button>
-                <button class="share-btn" data-platform="telegram">
-                    <i class="fab fa-telegram"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="analytics-container" style="display: none;">
-            <h3>File Analytics</h3>
-            <div class="analytics-data">
-                <div class="stat">
-                    <span class="stat-label">Total Downloads</span>
-                    <span id="totalDownloads">0</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Storage Used</span>
-                    <span id="storageUsed">0 MB</span>
-                </div>
+            
+            <p class="email-info">Or Send via Email</p>
+            <div class="email-container">
+                <form id="emailForm">
+                    <div class="filed">
+                        <label for="fromEmail">Your email</label>
+                        <input type="email" required name="from-email" id="fromEmail">
+                    </div>
+                    <div class="filed">
+                        <label for="toEmail">Receiver's email</label>
+                        <input type="email" required name="to-email" id="toEmail">
+                    </div>
+                    <button type="submit">Send</button>
+                </form>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Auth Modals -->
-    <div id="loginModal" class="modal" style="display: none;">
-        <!-- Login form content -->
-    </div>
-
-    <div id="registerModal" class="modal" style="display: none;">
-        <!-- Register form content -->
-    </div>
-
+    <!-- Toast Notification -->
     <div class="toast"></div>
 
-    <script src="js/app.js"></script>
+    <!-- Scripts -->
+    <script src="js/upload.js"></script>
 </body>
 </html>
