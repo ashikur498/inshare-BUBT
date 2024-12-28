@@ -1,5 +1,5 @@
 {
-  "name": "inshare_BUBT",
+  "name": "inshare",
   "version": "1.0.0",
   "main": "server.js",
   "engines": {
