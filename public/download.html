@@ -8,7 +8,9 @@
 </head>
 <body>
     <section class="download">
-        <img class="download__icon" src="/img/download-sd.svg" alt="inshare-download">
+        <div class="download__icon">
+            <img src="/img/download-sd.svg" alt="inshare-download">
+        </div>
         <h2>Your file is ready to download</h2>
         <p class="download__meta">
             <span class="download__filename"></span>
@@ -28,14 +30,13 @@
         const uuid = window.location.pathname.split('/').pop();
 
         // Fetch file details
-        fetch(`/files/${uuid}`)
+        fetch(`/api/files/${uuid}`)
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
                     showError(data.error);
                     return;
                 }
-                console.log(data);
                 downloadBtn.href = data.downloadLink;
                 filename.textContent = data.fileName;
                 filesize.textContent = formatBytes(data.fileSize);

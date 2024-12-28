@@ -414,6 +414,16 @@ nav {
 
 .download__icon {
   height: 8rem;
+  margin-bottom: 1rem;
+}
+
+.download__icon img {
+  height: 100%;
+}
+
+.download h2 {
+  margin-bottom: 1rem;
+  color: #0288d1;
 }
 
 .download__meta {
@@ -421,21 +431,35 @@ nav {
   margin-bottom: 1rem;
 }
 
+.download__filename {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.download__filesize {
+  color: #0288d1;
+}
+
 .download__btn {
-  background: var(--primary-color);
+  background: #0288d1;
   color: #fff;
   padding: 1rem 2rem;
   border-radius: 5px;
   text-decoration: none;
   display: inline-block;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
 }
 
 .download__btn:hover {
-  background: var(--primary-dark);
+  background: #0277bd;
+  transform: scale(1.02);
 }
 
 .error {
-  color: red;
+  color: #ff5252;
+  font-size: 1.2rem;
 }
 
 /* Animations */
