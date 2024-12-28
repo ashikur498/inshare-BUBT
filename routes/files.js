@@ -164,12 +164,9 @@ router.get('/download/:uuid', async (req, res) => {
 // Delete expired files (can be called by a cron job)
 router.delete('/delete-expired', async (req, res) => {
     const fs = require('fs').promises;
-    const { adminKey } = req.body;
+    
 
-    // Simple admin key check (you should implement better security)
-    if (adminKey !== process.env.ADMIN_KEY) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
+    
 
     try {
         // Find files older than 24 hours
