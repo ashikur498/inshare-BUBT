@@ -1,4 +1,4 @@
-const File = require('../models/file');
+const File = require('../models/File');
 const Analytics = require('../models/Analytics');
 const { v4: uuid4 } = require('uuid');
 const encryptionService = require('../services/encryptionService');

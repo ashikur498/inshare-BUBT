@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../server');
 const { connect, closeDatabase, clearDatabase } = require('./setup');
-const File = require('../models/file');
+const File = require('../models/File');
 
 beforeAll(async () => await connect());
 afterEach(async () => await clearDatabase());
