@@ -14,20 +14,16 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Email already registered' });
         }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
         // Create new user
         const user = new User({
             name,
             email,
-            password: hashedPassword
+            password // Password will be hashed by the pre-save middleware
         });
 
         await user.save();
 
-        // Generate JWT token
+        // Generate token
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
@@ -60,13 +56,13 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Check password
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
+        // Compare password
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Generate JWT token
+        // Generate token
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
@@ -88,7 +84,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Get User Profile Route (Protected Route)
+// Get user profile (protected route)
 router.get('/profile', async (req, res) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '');
@@ -102,17 +98,6 @@ router.get('/profile', async (req, res) => {
         res.json(user);
     } catch (error) {
         res.status(401).json({ error: 'Please authenticate' });
-    }
-});
-
-// Logout Route
-router.post('/logout', async (req, res) => {
-    try {
-        // Since we're using JWT, we just send a success response
-        // The actual logout is handled on the client side by removing the token
-        res.json({ message: 'Logged out successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Logout failed' });
     }
 });
 

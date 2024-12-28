@@ -4,52 +4,27 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
-        trim: true,
-        minlength: 2,
-        maxlength: 50
+        required: true
     },
     email: {
         type: String,
         required: true,
         unique: true,
-        trim: true,
-        lowercase: true,
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+        lowercase: true
     },
     password: {
         type: String,
-        required: true,
-        minlength: 6
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    lastLogin: {
-        type: Date
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    },
-    files: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'File'
-    }]
-}, {
-    timestamps: true
-});
+        required: true
+    }
+}, { timestamps: true });
 
-// Pre-save middleware to hash password
+// Hash password before saving
 userSchema.pre('save', async function(next) {
-    // Only hash the password if it's modified (or new)
-    if (!this.isModified('password')) return next();
-
+    if (!this.isModified('password')) {
+        return next();
+    }
     try {
-        // Generate salt
         const salt = await bcrypt.genSalt(10);
-        // Hash password
         this.password = await bcrypt.hash(this.password, salt);
         next();
     } catch (error) {
@@ -66,17 +41,4 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
     }
 };
 
-// Method to get public profile
-userSchema.methods.getPublicProfile = function() {
-    const userObject = this.toObject();
-    delete userObject.password;
-    delete userObject.__v;
-    return userObject;
-};
-
-// Add indexes
-userSchema.index({ email: 1 });
-
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
