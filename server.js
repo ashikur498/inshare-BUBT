@@ -9,7 +9,7 @@ const connectDB = require('./config/db');
 connectDB();
 
 // CORS Configuration
-const allowedOrigins = process.env.ALLOWED_CLIENTS.split(',');
+const allowedOrigins = process.env.ALLOWED_CLIENTS ? process.env.ALLOWED_CLIENTS.split(',') : ['https://inshare-bubt.onrender.com', 'http://localhost:3000','http://localhost:5000','http://localhost:3300','http://localhost:10000'];
 const corsOptions = {
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
