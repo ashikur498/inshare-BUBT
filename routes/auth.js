@@ -27,7 +27,22 @@ router.post('/register', async (req, res) => {
 
         await user.save();
 
-        res.status(201).json({ message: 'Registration successful' });
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.status(201).json({
+            message: 'Registration successful',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            },
+            token
+        });
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ error: 'Registration failed' });
@@ -59,16 +74,45 @@ router.post('/login', async (req, res) => {
         );
 
         res.json({
-            token,
+            message: 'Login successful',
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email
-            }
+            },
+            token
         });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Get User Profile Route (Protected Route)
+router.get('/profile', async (req, res) => {
+    try {
+        const token = req.header('Authorization').replace('Bearer ', '');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findOne({ _id: decoded.userId }).select('-password');
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(401).json({ error: 'Please authenticate' });
+    }
+});
+
+// Logout Route
+router.post('/logout', async (req, res) => {
+    try {
+        // Since we're using JWT, we just send a success response
+        // The actual logout is handled on the client side by removing the token
+        res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Logout failed' });
     }
 });
 

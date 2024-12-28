@@ -130,6 +130,39 @@ const showToast = (msg) => {
     }, 2000);
 };
 
+emailForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const url = fileURLInput.value;
+    const formData = {
+        uuid: url.split("/").splice(-1, 1)[0],
+        emailTo: emailForm.elements["to-email"].value,
+        emailFrom: emailForm.elements["from-email"].value,
+    };
+
+    emailForm[2].setAttribute("disabled", "true");
+
+    fetch(emailURL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+    })
+        .then((res) => res.json())
+        .then(({ success }) => {
+            if (success) {
+                sharingContainer.style.display = "none";
+                showToast("Email Sent");
+            }
+        })
+        .catch(() => {
+            showToast("Error sending email");
+        })
+        .finally(() => {
+            emailForm[2].removeAttribute("disabled");
+        });
+});
+
 // Login Button Handler
 loginBtn.addEventListener("click", () => {
     const loginHTML = `
@@ -252,40 +285,6 @@ registerBtn.addEventListener("click", () => {
             showToast('Registration failed');
         }
     });
-});
-
-// Email form submission
-emailForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const url = fileURLInput.value;
-    const formData = {
-        uuid: url.split("/").splice(-1, 1)[0],
-        emailTo: emailForm.elements["to-email"].value,
-        emailFrom: emailForm.elements["from-email"].value,
-    };
-
-    emailForm[2].setAttribute("disabled", "true");
-
-    fetch(emailURL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-    })
-        .then((res) => res.json())
-        .then(({ success }) => {
-            if (success) {
-                sharingContainer.style.display = "none";
-                showToast("Email Sent");
-            }
-        })
-        .catch(() => {
-            showToast("Error sending email");
-        })
-        .finally(() => {
-            emailForm[2].removeAttribute("disabled");
-        });
 });
 
 // Update UI based on auth state
