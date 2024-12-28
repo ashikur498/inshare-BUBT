@@ -8,14 +8,34 @@ const connectDB = require('./config/db');
 // Connect to Database
 connectDB();
 
+// CORS Configuration
+const allowedOrigins = process.env.ALLOWED_CLIENTS.split(',');
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+
+// Security Headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
 // Middleware
 app.use(express.static('public'));
 app.use(express.json());
-app.use(cors());
-
-// Template engine
-app.set('views', path.join(__dirname, '/views'));
-app.set('view engine', 'ejs');
 
 // Routes
 app.use('/api/files', require('./routes/files'));
@@ -23,20 +43,13 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/files', require('./routes/show'));
 app.use('/files/download', require('./routes/download'));
 
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
+    if (err.name === 'UnauthorizedError') {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
     console.error(err.stack);
     res.status(500).json({ error: 'Something went wrong!' });
-});
-
-// Serve index.html for root route
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Handle 404
-app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
 });
 
 const PORT = process.env.PORT || 3000;
@@ -44,14 +57,13 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-// Handle unhandled promise rejections
+// Handle unhandled promise rejections and exceptions
 process.on('unhandledRejection', (err) => {
     console.log('UNHANDLED REJECTION! 💥 Shutting down...');
     console.log(err.name, err.message);
     process.exit(1);
 });
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
     console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
     console.log(err.name, err.message);

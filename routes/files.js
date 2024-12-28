@@ -3,13 +3,12 @@ const multer = require('multer');
 const path = require('path');
 const File = require('../models/File');
 const { v4: uuid4 } = require('uuid');
-const auth = require('../middleware/auth'); // If you're using authentication
+const emailService = require('../services/emailService');
+const encryptionService = require('../services/encryptionService');
 
-// Configure multer for file upload
+// Multer configuration
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
+    destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => {
         const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
         cb(null, uniqueName);
@@ -18,44 +17,66 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage,
-    limits: {
-        fileSize: 1000000 * 100 // 100MB
-    }
+    limits: { fileSize: 1000000 * 100 }, // 100mb
 }).single('myfile');
 
 // Upload file
 router.post('/', (req, res) => {
-    // Store file
     upload(req, res, async (err) => {
         // Validate request
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-
+        
         if (!req.file) {
             return res.status(400).json({ error: 'All fields are required.' });
         }
 
-        // Store into Database
-        const file = new File({
-            filename: req.file.filename,
-            uuid: uuid4(),
-            path: req.file.path,
-            size: req.file.size
-        });
-
         try {
+            // Encrypt file if encryption is enabled
+            let filePath = req.file.path;
+            if (process.env.ENCRYPTION_KEY) {
+                filePath = await encryptionService.encryptFile(req.file.path);
+            }
+
+            // Store file in database
+            const file = new File({
+                filename: req.file.filename,
+                uuid: uuid4(),
+                path: filePath,
+                size: req.file.size
+            });
+
             const response = await file.save();
             return res.json({ 
                 file: `${process.env.APP_BASE_URL}/files/${response.uuid}` 
             });
-        } catch (err) {
-            return res.status(500).json({ error: 'Error saving file to database.' });
+        } catch (error) {
+            console.error('Upload error:', error);
+            return res.status(500).json({ error: 'Error uploading file.' });
         }
     });
 });
 
-// Email sending route
+// Get file info
+router.get('/:uuid', async (req, res) => {
+    try {
+        const file = await File.findOne({ uuid: req.params.uuid });
+        if (!file) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+        return res.json({
+            uuid: file.uuid,
+            fileName: file.filename,
+            fileSize: file.size,
+            downloadLink: `${process.env.APP_BASE_URL}/files/download/${file.uuid}`
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
+// Send email
 router.post('/send', async (req, res) => {
     const { uuid, emailTo, emailFrom } = req.body;
 
@@ -65,14 +86,13 @@ router.post('/send', async (req, res) => {
     }
 
     try {
-        // Get file from database
         const file = await File.findOne({ uuid: uuid });
 
         if (!file) {
             return res.status(404).json({ error: 'File not found.' });
         }
 
-        // Check if file was already sent
+        // Check if email was already sent
         if (file.sender) {
             return res.status(400).json({ error: 'Email already sent.' });
         }
@@ -84,7 +104,7 @@ router.post('/send', async (req, res) => {
 
         // Send email
         const sendMail = require('../services/emailService');
-        sendMail({
+        await sendMail({
             from: emailFrom,
             to: emailTo,
             subject: 'inShare file sharing',
@@ -95,69 +115,89 @@ router.post('/send', async (req, res) => {
                 size: parseInt(file.size/1000) + ' KB',
                 expires: '24 hours'
             })
-        }).then(() => {
-            return res.json({ success: true });
-        }).catch(err => {
-            return res.status(500).json({ error: 'Error in email sending.' });
         });
-    } catch (err) {
-        return res.status(500).json({ error: 'Something went wrong.' });
+
+        return res.json({ success: true });
+    } catch (error) {
+        console.error('Email error:', error);
+        return res.status(500).json({ error: 'Error sending email.' });
     }
 });
 
-// Get file info route
-router.get('/:uuid', async (req, res) => {
-    try {
-        const file = await File.findOne({ uuid: req.params.uuid });
-        if (!file) {
-            return res.status(404).json({ error: 'File not found.' });
-        }
-        return res.json({
-            uuid: file.uuid,
-            fileName: file.filename,
-            fileSize: file.size,
-            downloadLink: `${process.env.APP_BASE_URL}/files/download/${file.uuid}`
-        });
-    } catch (err) {
-        return res.status(500).json({ error: 'Something went wrong.' });
-    }
-});
-
-// Download file route
+// Download file
 router.get('/download/:uuid', async (req, res) => {
     try {
         const file = await File.findOne({ uuid: req.params.uuid });
         
         if (!file) {
-            return res.status(404).json({ error: 'File not found.' });
+            return res.status(404).json({ error: 'File not found' });
         }
 
-        const filePath = path.join(__dirname, '..', file.path);
-        res.download(filePath);
-    } catch (err) {
-        return res.status(500).json({ error: 'Something went wrong.' });
+        let filePath = file.path;
+        
+        // Decrypt file if it's encrypted
+        if (process.env.ENCRYPTION_KEY && file.path.endsWith('.enc')) {
+            filePath = await encryptionService.decryptFile(file.path);
+        }
+
+        res.download(filePath, file.filename, async (err) => {
+            if (err) {
+                console.error('Download error:', err);
+                return res.status(500).json({ error: 'Error downloading file.' });
+            }
+            
+            // Clean up decrypted file if it was created
+            if (filePath !== file.path) {
+                try {
+                    await fs.unlink(filePath);
+                } catch (error) {
+                    console.error('Error deleting decrypted file:', error);
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Download error:', error);
+        return res.status(500).json({ error: 'Error downloading file.' });
     }
 });
 
-// Delete expired files route (optional, can be used with a cron job)
+// Delete expired files (can be called by a cron job)
 router.delete('/delete-expired', async (req, res) => {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const fs = require('fs').promises;
+    const { adminKey } = req.body;
+
+    // Simple admin key check (you should implement better security)
+    if (adminKey !== process.env.ADMIN_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     try {
-        const files = await File.find({ createdAt: { $lt: twentyFourHoursAgo } });
-        
+        // Find files older than 24 hours
+        const files = await File.find({ 
+            createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) } 
+        });
+
         if (files.length) {
             for (const file of files) {
                 try {
-                    fs.unlinkSync(file.path);
+                    // Delete file from storage
+                    await fs.unlink(file.path);
+                    // Delete encrypted file if exists
+                    if (file.path.endsWith('.enc')) {
+                        await fs.unlink(file.path.replace('.enc', ''));
+                    }
+                    // Delete from database
                     await file.remove();
-                } catch (err) {
-                    console.error(err);
+                } catch (error) {
+                    console.error(`Error deleting file ${file.filename}:`, error);
                 }
             }
+            return res.json({ message: `Deleted ${files.length} expired files` });
         }
-        return res.json({ message: 'Expired files cleaned up.' });
-    } catch (err) {
-        return res.status(500).json({ error: 'Something went wrong.' });
+        return res.json({ message: 'No expired files found' });
+    } catch (error) {
+        console.error('Error cleaning up files:', error);
+        return res.status(500).json({ error: 'Error cleaning up files' });
     }
 });
 

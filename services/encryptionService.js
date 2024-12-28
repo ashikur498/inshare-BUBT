@@ -1,6 +1,6 @@
 const crypto = require('crypto');
-const fs = require('fs').promises;
 const path = require('path');
+const fs = require('fs').promises;
 
 class EncryptionService {
     constructor() {
@@ -33,7 +33,10 @@ class EncryptionService {
             const encryptedFileData = encryptedData.slice(16);
             
             const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv);
-            const decrypted = Buffer.concat([decipher.update(encryptedFileData), decipher.final()]);
+            const decrypted = Buffer.concat([
+                decipher.update(encryptedFileData),
+                decipher.final()
+            ]);
             
             const decryptedFilePath = filePath.replace('.enc', '.dec');
             await fs.writeFile(decryptedFilePath, decrypted);
