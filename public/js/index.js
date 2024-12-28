@@ -13,7 +13,8 @@ const toast = document.querySelector(".toast");
 const loginBtn = document.querySelector("#loginBtn");
 const registerBtn = document.querySelector("#registerBtn");
 
-const host = "http://localhost:3000/";
+//const host = "http://localhost:3000/";
+const host = "https://inshare-bubt.onrender.com/";
 const uploadURL = `${host}api/files`;
 const emailURL = `${host}api/files/send`;
 
