@@ -13,7 +13,6 @@ const toast = document.querySelector(".toast");
 const loginBtn = document.querySelector("#loginBtn");
 const registerBtn = document.querySelector("#registerBtn");
 
-//const host = "http://localhost:3000/";
 const host = "https://inshare-bubt.onrender.com/";
 const uploadURL = `${host}api/files`;
 const emailURL = `${host}api/files/send`;
@@ -131,37 +130,50 @@ const showToast = (msg) => {
     }, 2000);
 };
 
-emailForm.addEventListener("submit", (e) => {
+emailForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const url = fileURLInput.value;
+
+    if (!url) {
+        showToast("Please upload a file first");
+        return;
+    }
+
     const formData = {
         uuid: url.split("/").splice(-1, 1)[0],
         emailTo: emailForm.elements["to-email"].value,
         emailFrom: emailForm.elements["from-email"].value,
     };
 
-    emailForm[2].setAttribute("disabled", "true");
+    // Disable the send button and show sending state
+    const submitBtn = emailForm.querySelector("button");
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "Sending...";
 
-    fetch(emailURL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-    })
-        .then((res) => res.json())
-        .then(({ success }) => {
-            if (success) {
-                sharingContainer.style.display = "none";
-                showToast("Email Sent");
-            }
-        })
-        .catch(() => {
-            showToast("Error sending email");
-        })
-        .finally(() => {
-            emailForm[2].removeAttribute("disabled");
+    try {
+        const response = await fetch(emailURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
         });
+
+        const data = await response.json();
+        if (data.success) {
+            sharingContainer.style.display = "none";
+            showToast("Email Sent Successfully");
+            emailForm.reset();
+        } else {
+            showToast(data.error || "Failed to send email");
+        }
+    } catch (err) {
+        showToast("Error sending email");
+    } finally {
+        // Re-enable the send button and restore original text
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Send";
+    }
 });
 
 // Login Button Handler
