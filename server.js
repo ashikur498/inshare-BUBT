@@ -18,7 +18,7 @@ const corsOptions = {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(null, true); // Allow all origins for now
+            callback(null, true);
         }
     },
     credentials: true,
@@ -32,11 +32,45 @@ app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(express.json());
 
-app.use('/uploads', express.static('uploads', {
-    setHeaders: (res, path, stat) => {
-        res.set('Content-Type', 'application/octet-stream');
-    }
-}));
+// Helper function to get content type
+function getContentType(extension) {
+    const mimeTypes = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.xls': 'application/vnd.ms-excel',
+        '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        '.txt': 'text/plain',
+        '.zip': 'application/zip',
+        '.mp4': 'video/mp4',
+        '.mp3': 'audio/mpeg',
+    };
+    return mimeTypes[extension] || 'application/octet-stream';
+}
+
+// Serve static files from uploads directory
+app.use('/uploads', (req, res, next) => {
+    const filePath = path.join(__dirname, 'uploads', req.path);
+    const ext = path.extname(req.path).toLowerCase();
+    
+    res.set({
+        'Content-Type': getContentType(ext),
+        'Content-Disposition': 'attachment'
+    });
+    
+    next();
+}, express.static('uploads'));
+
+// Create uploads directory if it doesn't exist
+const fs = require('fs');
+const uploadDirectory = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDirectory)) {
+    fs.mkdirSync(uploadDirectory, { recursive: true });
+}
 
 // Routes
 app.use('/api/files', require('./routes/files'));
@@ -44,17 +78,24 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/files', require('./routes/show'));
 app.use('/files/download', require('./routes/download'));
 
+// Serve index.html for root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Something went wrong!' });
 });
-app.get('/files/:uuid', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'download.html'));
+
+// Handle 404
+app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
@@ -62,12 +103,24 @@ app.listen(PORT, () => {
 process.on('unhandledRejection', (err) => {
     console.log('UNHANDLED REJECTION! 💥 Shutting down...');
     console.log(err.name, err.message);
-    process.exit(1);
+    server.close(() => {
+        process.exit(1);
+    });
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
     console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
     console.log(err.name, err.message);
-    process.exit(1);
+    server.close(() => {
+        process.exit(1);
+    });
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+    server.close(() => {
+        console.log('💥 Process terminated!');
+    });
 });

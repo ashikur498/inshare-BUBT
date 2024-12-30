@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const File = require('../models/File');
 const path = require('path');
-const fs = require('fs'); // Add this to check file existence
+const fs = require('fs');
 
 router.get('/:uuid', async (req, res) => {
     try {
@@ -11,32 +11,36 @@ router.get('/:uuid', async (req, res) => {
             return res.status(404).json({ error: 'File not found' });
         }
 
-        // Construct absolute file path
-        const filePath = path.resolve(__dirname, '..', file.path);
+        const filePath = path.join(__dirname, '..', file.path);
 
-        // Check if the file exists
+        // Check if file exists
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({ error: 'File not found on server' });
         }
 
-        // Set correct headers for download
+        // Set headers for file download
         res.set({
             'Content-Type': 'application/octet-stream',
-            'Content-Disposition': `attachment; filename="${file.filename}"`
+            'Content-Disposition': `attachment; filename="${file.filename}"`,
+            'Content-Length': file.size
         });
 
-        // Send file for download
-        return res.download(filePath, file.filename, (err) => {
-            if (err) {
-                console.error('Download Error:', err);
-                if (!res.headersSent) {
-                    return res.status(500).json({ error: 'Error downloading file' });
-                }
+        // Create read stream
+        const fileStream = fs.createReadStream(filePath);
+        
+        // Handle stream errors
+        fileStream.on('error', (error) => {
+            console.error('Stream Error:', error);
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Error streaming file' });
             }
         });
 
-    } catch (err) {
-        console.error('Download Error:', err);
+        // Pipe the file to the response
+        fileStream.pipe(res);
+
+    } catch (error) {
+        console.error('Download Error:', error);
         return res.status(500).json({ error: 'Something went wrong' });
     }
 });
