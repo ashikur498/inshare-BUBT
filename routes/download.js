@@ -10,22 +10,25 @@ router.get('/:uuid', async (req, res) => {
             return res.status(404).json({ error: 'File not found' });
         }
 
+        // Construct absolute file path
         const filePath = path.join(__dirname, '..', file.path);
-        
-        // Set headers for file download
+
+        // Set correct headers for download
         res.set({
             'Content-Type': 'application/octet-stream',
-            'Content-Disposition': `attachment; filename="${file.filename}"`,
-            'Content-Length': file.size
+            'Content-Disposition': `attachment; filename="${file.filename}"`
         });
 
-        // Send the file
-        return res.download(filePath, file.filename, (err) => {
+        // Send file for download
+        res.sendFile(filePath, (err) => {
             if (err) {
                 console.error('Download Error:', err);
-                return res.status(500).json({ error: 'Error downloading file' });
+                if (!res.headersSent) {
+                    return res.status(500).json({ error: 'Error downloading file' });
+                }
             }
         });
+
     } catch (err) {
         console.error('Download Error:', err);
         return res.status(500).json({ error: 'Something went wrong' });

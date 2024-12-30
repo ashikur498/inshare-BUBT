@@ -32,6 +32,12 @@ app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(express.json());
 
+app.use('/uploads', express.static('uploads', {
+    setHeaders: (res, path, stat) => {
+        res.set('Content-Type', 'application/octet-stream');
+    }
+}));
+
 // Routes
 app.use('/api/files', require('./routes/files'));
 app.use('/api/auth', require('./routes/auth'));
