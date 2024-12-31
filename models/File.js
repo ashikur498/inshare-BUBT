@@ -18,7 +18,7 @@ const fileSchema = new mongoose.Schema({
         required: true
     },
     sender: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'User'
     },
     receiver: {
