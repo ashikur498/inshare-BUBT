@@ -32,9 +32,6 @@ nav {
   justify-content: space-between;
   background: white;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: fixed; /* Add this */
-  top: 0; /* Add this */
-  z-index: 100; /* Add this */
 }
 
 .logo img {
@@ -79,7 +76,7 @@ nav {
   border-radius: 25px;
   box-shadow: 0 20px 20px 0px #00000017;
   padding: 30px;
-  margin: 80px auto 20px; /* Update margin-top to 80px */;
+  margin: 50px auto;
 }
 
 .drop-zone {
@@ -195,13 +192,6 @@ nav {
   width: 100%;
   margin-top: 20px;
   display: none;
-  padding: 20px 0;
-  flex-direction: column;
-  gap: 20px; /* Add consistent spacing between elements */
-
-
-  /*position: relative; /* Add this */
-  /*z-index: 1; /* Add this */
 }
 
 .sharing-container p {
@@ -211,15 +201,12 @@ nav {
 
 .sharing-container .expire {
   color: var(--border-color);
-  margin: 20px 0; /* Space around expire text */
-text-align: center;
-
+  margin: 20px 0;
 }
 
 .sharing-container .input-container {
   position: relative;
   margin: 20px 0;
-
 }
 
 .sharing-container .input-container input {
@@ -241,6 +228,36 @@ text-align: center;
   padding: 2px;
 }
 
+/* QR Code styles */
+.qr-container {
+  width: 100%;
+  text-align: center;
+  margin: 20px 0;
+  padding: 20px 0;
+}
+
+#downloadQR {
+  background: var(--border-color);
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+#qrCode {
+  display: block;
+  width: 150px;
+  height: 150px;
+  margin: 20px auto;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
 /* Email container styles */
 .email-container {
   display: flex;
@@ -253,7 +270,6 @@ text-align: center;
   border: 2px solid var(--border-color);
   padding: 15px;
   border-radius: 10px;
-  
 }
 
 .email-container .filed {
@@ -302,6 +318,7 @@ text-align: center;
   font-size: 14px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out;
+  z-index: 1000;
 }
 
 .toast.error {
@@ -365,6 +382,13 @@ text-align: center;
   color: #666;
 }
 
+/* Button states for email sending */
+button:disabled {
+  background: #cccccc !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 /* Responsive styles */
 @media screen and (max-width: 900px) {
   :root {
@@ -372,10 +396,7 @@ text-align: center;
   }
   
   .upload-container {
-    margin:20px auto; /* Slightly less margin on mobile */
-    width: 90%; /* Make it more responsive */
-    max-width: var(--container-width);
-      
+      margin: 20px auto;
   }
   
   .progress-bar {
@@ -385,6 +406,16 @@ text-align: center;
   .auth-container {
       width: 95%;
       padding: 1.5rem;
+  }
+
+  #qrCode {
+      width: 120px;
+      height: 120px;
+      margin: 15px auto;
+  }
+
+  .drop-zone {
+      min-height: 150px;
   }
 }
 
@@ -419,209 +450,4 @@ text-align: center;
   .close-modal {
       color: #fff;
   }
-}
-.download {
-  background: #ffffff;
-  border-radius: 25px;
-  box-shadow: 0 20px 20px 0 #00000017;
-  padding: 2rem;
-  text-align: center;
-  width: 400px;
-  margin: 50px auto;
-}
-
-.download__icon {
-  height: 8rem;
-  margin-bottom: 1rem;
-}
-
-.download__icon img {
-  height: 100%;
-}
-
-.download h2 {
-  margin-bottom: 1rem;
-  color: #0288d1;
-}
-
-.download__meta {
-  color: #0000008c;
-  margin-bottom: 1rem;
-}
-
-.download__filename {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-}
-
-.download__filesize {
-  color: #0288d1;
-}
-
-.download__btn {
-  background: #0288d1;
-  color: #fff;
-  padding: 1rem 2rem;
-  border-radius: 5px;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 1.1rem;
-  transition: all 0.2s ease;
-}
-
-.download__btn:hover {
-  background: #0277bd;
-  transform: scale(1.02);
-}
-
-.error {
-  color: #ff5252;
-  font-size: 1.2rem;
-}
-
-/* Animations */
-@keyframes pulse {
-  0% {
-      transform: scale(1);
-  }
-  50% {
-      transform: scale(1.05);
-  }
-  100% {
-      transform: scale(1);
-  }
-}
-/* Add these styles to your existing style.css */
-
-/* Button states for email sending */
-button:disabled {
-  background: #cccccc !important;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* Loading animation for send button */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-button[disabled]::after {
-  content: '';
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin-left: 10px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  border-top-color: transparent;
-  animation: spin 1s linear infinite;
-}
-
-/* Improve toast visibility */
-.toast {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translate(-50%, 60px);
-  padding: 10px 20px;
-  border-radius: 5px;
-  background: var(--toast-success);
-  color: #fff;
-  font-size: 14px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out;
-  z-index: 1000;
-}
-
-.toast.error {
-  background: var(--toast-error);
-}
-
-/* Success state for email sent */
-.email-success {
-  color: var(--toast-success);
-  text-align: center;
-  margin-top: 10px;
-  display: none;
-}
-
-.email-success.show {
-  display: block;
-}
-
-/*qr shru*/
-/* Add these new styles to your existing CSS */
-
-.qr-container {
-  width: 100%;
-  text-align: center;
-  margin: 20px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  border: 2px solid var(--border-color);
-  border-radius: 10px;
-  background: #f8f9fa;
-  position: relative; /* Add this */
-}
-
-.qr-container img {
-  width: 150px;
-  height: 150px;
-  padding: 10px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  margin: 20px auto; /* Space above and below QR code */
-  display: block; /* Ensure it's a block element */
-}
-
-#downloadQR {
-  background: var(--border-color);
-  color: #fff;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  
-  margin-bottom: 20px; /* Add margin bottom */
-
-}
-
-#downloadQR:hover {
-  background: #0277bd;
-  transform: scale(1.02);
-}
-
-#downloadQR:active {
-  transform: scale(0.98);
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .qr-container {
-      background: #2d2d2d;
-      border-color: #444;
-  }
-
-  .qr-container img {
-      background: #fff; /* Keep QR code background white for readability */
-  }
-}
-
-/* Mobile responsiveness */
-@media screen and (max-width: 900px) {
-  .qr-container img {
-      width: 120px;
-      height: 120px;
-  }
-}
-/*sesh*/
-
-
-.drop-zone:hover .icon-container {
-  animation: pulse 1s infinite;
 }
