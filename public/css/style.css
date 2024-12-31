@@ -274,7 +274,8 @@ nav {
 }
 
 .download__icon {
-  height: 8rem;
+  height: 20rem;
+  margin-bottom: 1.5rem;
 }
 
 .download__meta {
@@ -453,7 +454,7 @@ nav {
   }
 
   .download__icon {
-      height: 6rem;
+      height: 8rem;
   }
 }
 
