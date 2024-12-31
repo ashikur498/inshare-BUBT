@@ -12,6 +12,8 @@ const emailForm = document.querySelector("#emailForm");
 const toast = document.querySelector(".toast");
 const loginBtn = document.querySelector("#loginBtn");
 const registerBtn = document.querySelector("#registerBtn");
+const qrCodeImg = document.querySelector("#qrCode");
+const downloadQRBtn = document.querySelector("#downloadQR");
 
 const host = "https://inshare-bubt.onrender.com/";
 const uploadURL = `${host}api/files`;
@@ -111,14 +113,30 @@ const updateProgress = (e) => {
     progressBar.style.transform = `scaleX(${percent/100})`;
 };
 
-const onUploadSuccess = ({file: url}) => {
+const onUploadSuccess = ({file: url,qrCode}) => {
+
     console.log(url);
     fileInput.value = ""; // Reset the input
     emailForm[2].removeAttribute("disabled");
     progressContainer.style.display = "none";
     sharingContainer.style.display = "block";
     fileURLInput.value = url;
+    qrCodeImg.src = qrCode;
+
 };
+downloadQRBtn.addEventListener("click", () => {
+    try {
+        const link = document.createElement('a');
+        link.download = 'share-qr-code.png';
+        link.href = qrCodeImg.src;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("QR Code downloaded successfully");
+    } catch (error) {
+        showToast("Error downloading QR code");
+    }
+});
 
 let toastTimer;
 const showToast = (msg) => {

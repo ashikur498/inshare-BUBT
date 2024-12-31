@@ -4,6 +4,8 @@ const path = require('path');
 const File = require('../models/File');
 const { v4: uuid4 } = require('uuid');
 const emailService = require('../services/emailService');
+const QRCode = require('qrcode');
+
 
 // Multer configuration
 const storage = multer.diskStorage({
@@ -40,8 +42,11 @@ router.post('/', (req, res) => {
             });
 
             const response = await file.save();
+            const fileUrl = `${process.env.APP_BASE_URL}/files/${response.uuid}`;
+            const qrCode = await QRCode.toDataURL(fileUrl);
             return res.json({ 
-                file: `${process.env.APP_BASE_URL}/files/${response.uuid}` 
+                file: fileUrl,
+                qrCode: qrCode
             });
         } catch (error) {
             console.error('Upload error:', error);
@@ -114,6 +119,20 @@ router.post('/send', async (req, res) => {
         return res.status(500).json({ error: 'Error sending email.' });
     }
 });
+
+//qqqqqqqqqqqrrrrrrrrrrrr
+
+//const QRCode = require('qrcode');
+
+// In your upload route:
+/*const response = await file.save();
+const fileUrl = `${process.env.APP_BASE_URL}/files/${response.uuid}`;
+const qrCode = await QRCode.toDataURL(fileUrl);
+
+return res.json({ 
+    file: fileUrl,
+    qrCode: qrCode
+});*/
 
 // Delete expired files
 router.delete('/delete-expired', async (req, res) => {
