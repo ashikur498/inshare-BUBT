@@ -32,6 +32,9 @@ nav {
   justify-content: space-between;
   background: white;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed; /* Add this */
+  top: 0; /* Add this */
+  z-index: 100; /* Add this */
 }
 
 .logo img {
@@ -76,7 +79,7 @@ nav {
   border-radius: 25px;
   box-shadow: 0 20px 20px 0px #00000017;
   padding: 30px;
-  margin: 50px auto;
+  margin: 80px auto 20px; /* Update margin-top to 80px */;
 }
 
 .drop-zone {
@@ -192,6 +195,9 @@ nav {
   width: 100%;
   margin-top: 20px;
   display: none;
+  padding: 20px 0;
+  position: relative; /* Add this */
+  z-index: 1; /* Add this */
 }
 
 .sharing-container p {
@@ -357,7 +363,10 @@ nav {
   }
   
   .upload-container {
-      margin: 20px auto;
+    margin: 70px auto 20px; /* Slightly less margin on mobile */
+    width: 90%; /* Make it more responsive */
+    max-width: var(--container-width);
+      
   }
   
   .progress-bar {
@@ -544,6 +553,8 @@ button[disabled]::after {
   border: 2px solid var(--border-color);
   border-radius: 10px;
   background: #f8f9fa;
+  position: relative; /* Add this */
+  z-index: 1; /* Add this */
 }
 
 .qr-container img {
