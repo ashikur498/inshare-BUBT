@@ -3,15 +3,13 @@ const multer = require('multer');
 const path = require('path');
 const File = require('../models/File');
 const { v4: uuid4 } = require('uuid');
-const emailService = require('../services/emailService');
+const sendMail = require('../services/emailService');
 const QRCode = require('qrcode');
-
 
 // Multer configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => {
-        // Keep original filename in the database but use unique name for storage
         const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
         cb(null, uniqueName);
     }
@@ -22,7 +20,7 @@ const upload = multer({
     limits: { fileSize: 1000000 * 100 }, // 100mb
 }).single('myfile');
 
-// Upload file
+// Upload file route
 router.post('/', (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
@@ -35,7 +33,7 @@ router.post('/', (req, res) => {
 
         try {
             const file = new File({
-                filename: req.file.originalname, // Store original filename
+                filename: req.file.originalname,
                 uuid: uuid4(),
                 path: req.file.path,
                 size: req.file.size
@@ -55,7 +53,7 @@ router.post('/', (req, res) => {
     });
 });
 
-// Get file info
+// Get file info route
 router.get('/:uuid', async (req, res) => {
     try {
         const file = await File.findOne({ uuid: req.params.uuid });
@@ -73,7 +71,7 @@ router.get('/:uuid', async (req, res) => {
     }
 });
 
-// Send email
+// Send email route
 router.post('/send', async (req, res) => {
     const { uuid, emailTo, emailFrom } = req.body;
 
@@ -89,7 +87,6 @@ router.post('/send', async (req, res) => {
             return res.status(404).json({ error: 'File not found.' });
         }
 
-        // Check if email was already sent
         if (file.sender) {
             return res.status(400).json({ error: 'Email already sent.' });
         }
@@ -97,44 +94,34 @@ router.post('/send', async (req, res) => {
         file.sender = emailFrom;
         file.receiver = emailTo;
 
-        const response = await file.save();
+        await file.save();
 
         // Send email
-        await emailService({
-            from: emailFrom,
-            to: emailTo,
-            subject: 'inShare file sharing',
-            text: `${emailFrom} shared a file with you.`,
-            html: require('../services/emailTemplate')({
-                emailFrom: emailFrom,
-                downloadLink: `${process.env.APP_BASE_URL}/files/${file.uuid}`,
-                size: parseInt(file.size/1000) + ' KB',
-                expires: '24 hours'
-            })
-        });
-
-        return res.json({ success: true });
+        try {
+            await sendMail({
+                from: emailFrom,
+                to: emailTo,
+                subject: 'inShare file sharing',
+                text: `${emailFrom} shared a file with you.`,
+                html: require('../services/emailTemplate')({
+                    emailFrom: emailFrom,
+                    downloadLink: `${process.env.APP_BASE_URL}/files/${file.uuid}`,
+                    size: parseInt(file.size/1000) + ' KB',
+                    expires: '24 hours'
+                })
+            });
+            return res.json({ success: true });
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+            return res.status(500).json({ error: 'Error sending email.' });
+        }
     } catch (error) {
-        console.error('Email error:', error);
-        return res.status(500).json({ error: 'Error sending email.' });
+        console.error('File processing error:', error);
+        return res.status(500).json({ error: 'Error processing file.' });
     }
 });
 
-//qqqqqqqqqqqrrrrrrrrrrrr
-
-//const QRCode = require('qrcode');
-
-// In your upload route:
-/*const response = await file.save();
-const fileUrl = `${process.env.APP_BASE_URL}/files/${response.uuid}`;
-const qrCode = await QRCode.toDataURL(fileUrl);
-
-return res.json({ 
-    file: fileUrl,
-    qrCode: qrCode
-});*/
-
-// Delete expired files
+// Delete expired files route
 router.delete('/delete-expired', async (req, res) => {
     const fs = require('fs').promises;
     
@@ -160,5 +147,7 @@ router.delete('/delete-expired', async (req, res) => {
         return res.status(500).json({ error: 'Error cleaning up files' });
     }
 });
+
+// Test email route (optional, for testing purposes)
 
 module.exports = router;
