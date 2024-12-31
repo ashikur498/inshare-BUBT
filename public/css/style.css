@@ -197,6 +197,8 @@ nav {
   display: none;
   padding: 20px 0;
   flex-direction: column;
+  gap: 20px; /* Add consistent spacing between elements */
+
 
   /*position: relative; /* Add this */
   /*z-index: 1; /* Add this */
@@ -209,13 +211,15 @@ nav {
 
 .sharing-container .expire {
   color: var(--border-color);
-  margin-top: 20px; /* Add margin top */
+  margin: 20px 0; /* Space around expire text */
+text-align: center;
 
 }
 
 .sharing-container .input-container {
   position: relative;
   margin: 20px 0;
+
 }
 
 .sharing-container .input-container input {
@@ -249,6 +253,7 @@ nav {
   border: 2px solid var(--border-color);
   padding: 15px;
   border-radius: 10px;
+  
 }
 
 .email-container .filed {
@@ -367,7 +372,7 @@ nav {
   }
   
   .upload-container {
-    margin: 70px auto 20px; /* Slightly less margin on mobile */
+    margin:20px auto; /* Slightly less margin on mobile */
     width: 90%; /* Make it more responsive */
     max-width: var(--container-width);
       
@@ -549,26 +554,28 @@ button[disabled]::after {
 /* Add these new styles to your existing CSS */
 
 .qr-container {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
+  width: 100%;
+  text-align: center;
   margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
   border: 2px solid var(--border-color);
   border-radius: 10px;
   background: #f8f9fa;
   position: relative; /* Add this */
-  z-index: 1; /* Add this */
 }
 
 .qr-container img {
   width: 150px;
   height: 150px;
-  margin-top: 15px;
   padding: 10px;
   background: white;
   border: 1px solid #ddd;
   border-radius: 5px;
+  margin: 20px auto; /* Space above and below QR code */
+  display: block; /* Ensure it's a block element */
 }
 
 #downloadQR {
@@ -579,11 +586,8 @@ button[disabled]::after {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px; /* Add margin bottom */
+  
+  margin-bottom: 20px; /* Add margin bottom */
 
 }
 
