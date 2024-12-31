@@ -258,6 +258,43 @@ nav {
   border-radius: 5px;
 }
 
+/* Download page styles */
+.download {
+  background: #fff;
+  border-radius: 25px;
+  box-shadow: 0 20px 20px 0px #00000017;
+  padding: 2rem;
+  width: var(--container-width);
+  margin: 50px auto;
+  text-align: center;
+}
+
+.download h2 {
+  margin-bottom: 1rem;
+}
+
+.download__icon {
+  height: 8rem;
+}
+
+.download__meta {
+  color: #0000008c;
+  margin-bottom: 1rem;
+}
+
+.download__btn {
+  background: var(--border-color);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.download__btn:hover {
+  background: #0277bd;
+}
+
 /* Email container styles */
 .email-container {
   display: flex;
@@ -382,13 +419,6 @@ nav {
   color: #666;
 }
 
-/* Button states for email sending */
-button:disabled {
-  background: #cccccc !important;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
 /* Responsive styles */
 @media screen and (max-width: 900px) {
   :root {
@@ -417,6 +447,14 @@ button:disabled {
   .drop-zone {
       min-height: 150px;
   }
+
+  .download {
+      margin: 20px auto;
+  }
+
+  .download__icon {
+      height: 6rem;
+  }
 }
 
 /* Dark mode styles */
@@ -427,7 +465,8 @@ button:disabled {
   }
 
   .upload-container,
-  .auth-container {
+  .auth-container,
+  .download {
       background: #2d2d2d;
   }
 
@@ -449,5 +488,9 @@ button:disabled {
 
   .close-modal {
       color: #fff;
+  }
+
+  .download__meta {
+      color: #ffffff8c;
   }
 }
