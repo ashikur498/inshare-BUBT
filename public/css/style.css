@@ -196,8 +196,10 @@ nav {
   margin-top: 20px;
   display: none;
   padding: 20px 0;
-  position: relative; /* Add this */
-  z-index: 1; /* Add this */
+  flex-direction: column;
+
+  /*position: relative; /* Add this */
+  /*z-index: 1; /* Add this */
 }
 
 .sharing-container p {
@@ -207,6 +209,8 @@ nav {
 
 .sharing-container .expire {
   color: var(--border-color);
+  margin-top: 20px; /* Add margin top */
+
 }
 
 .sharing-container .input-container {
@@ -546,7 +550,7 @@ button[disabled]::after {
 
 .qr-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
   margin: 20px 0;
   padding: 20px;
@@ -560,7 +564,7 @@ button[disabled]::after {
 .qr-container img {
   width: 150px;
   height: 150px;
-  margin-bottom: 15px;
+  margin-top: 15px;
   padding: 10px;
   background: white;
   border: 1px solid #ddd;
@@ -579,6 +583,8 @@ button[disabled]::after {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 10px; /* Add margin bottom */
+
 }
 
 #downloadQR:hover {
