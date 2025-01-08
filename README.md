@@ -1,6 +1,3 @@
-Here’s a detailed and comprehensive README file based on your project report. You can copy and paste this directly into your GitHub repository.
-
----
 
 # **InShare_BUBT**  
 *A secure and intuitive file-sharing platform built for modern users.*  
@@ -222,4 +219,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-Let me know if you need any additional modifications or sections!
